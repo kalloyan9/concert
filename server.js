@@ -2,15 +2,26 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const rateLimit = require('express-rate-limit');
 const app = express();
+app.set('trust proxy', 1);
 const PORT = 3000;
+require('dotenv').config({ path: '/etc/secrets/.env' });
+
+const dataDir = path.join(__dirname, 'private/data');
+const uploadsDir = path.join(__dirname, 'private/uploads');
+const submissionsFile = path.join(dataDir, 'submissions.json');
+
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(submissionsFile)) fs.writeFileSync(submissionsFile, '[]');
 
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const storage = multer.diskStorage({
-    destination: 'uploads/',
+    destination: uploadsDir,
     filename: (req, file, cb) => {
         const uniqueName = Date.now() + '-' + file.originalname;
         cb(null, uniqueName);
@@ -46,18 +57,77 @@ app.post('/submit', upload.single('video'), (req, res) => {
         age,
         location,
         message,
-        video: req.file.filename,
+        video: req.file ? req.file.filename : null,
+        agree,
         timestamp: new Date().toISOString()
     };
 
-    const dbPath = path.join(__dirname, 'data', 'submissions.json');
-    const db = JSON.parse(fs.readFileSync(dbPath));
+    const db = JSON.parse(fs.readFileSync(submissionsFile));
     db.push(newEntry);
-    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+    fs.writeFileSync(submissionsFile, JSON.stringify(db, null, 2));
 
-    res.send(`<h2 style="text-align:center;">Благодарим ти, ${fname}!</h2><p style="text-align:center;">Посланието ти е получено успешно. Ще се опитам да сглобя красиво клипче и да го покажа на СЛАВИ!</p><a href="/" style="display:block;text-align:center;">⬅ Обратно</a>`);
+    res.send(`
+        <h2 style="text-align:center;">Благодарим ти, ${fname}!</h2>
+        <p style="text-align:center;">Посланието ти е получено успешно. Ще се опитам да сглобя красиво клипче и да го покажа на СЛАВИ!</p>
+        <a href="/" style="display:block;text-align:center;">⬅ Обратно</a>
+    `);
+});
+
+const auth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.setHeader('WWW-Authenticate', 'Basic');
+        return res.status(401).send('Authentication required.');
+    }
+
+    const base64 = authHeader.split(' ')[1];
+    const [user, pass] = Buffer.from(base64, 'base64').toString().split(':');
+
+    if (user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS) {
+        return next();
+    } else {
+        res.setHeader('WWW-Authenticate', 'Basic');
+        return res.status(401).send('Invalid credentials.');
+    }
+};
+
+const adminLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 3,
+    message: "Твърде много опити. Моля, опитайте по-късно.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.get('/admin', adminLimiter, auth, (req, res) => {
+    console.log("Client IP:", req.ip);
+    const data = JSON.parse(fs.readFileSync(submissionsFile));
+    let html = '<h1>Подадени заявки</h1><ul>';
+    data.forEach(entry => {
+        html += `<li>
+            <strong>${entry.fname} ${entry.lname}</strong> (${entry.email}, ${entry.age}, ${entry.location})<br>
+            <em>${entry.message}</em><br>`;
+        if (entry.video) {
+            html += `Видео: <a href="/admin/video/${entry.video}" target="_blank">Гледай</a><br>`;
+        } else {
+            html += `Без видео.<br>`;
+        }
+        html += `<br></li>`;
+    });
+    html += '</ul>';
+    res.send(html);
+});
+
+app.get('/admin/video/:filename', adminLimiter, auth, (req, res) => {
+    const videoPath = path.join(uploadsDir, req.params.filename);
+    if (fs.existsSync(videoPath)) {
+        res.sendFile(videoPath);
+    } else {
+        res.status(404).send("Видео не е намерено.");
+    }
 });
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
