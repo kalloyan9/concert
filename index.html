@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Искаме концерт на Слави!</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("./konc3.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .overlay-img {
+      position: absolute;
+      width: 600px;
+      opacity: 0.99;
+      z-index: 0;
+      border-radius: 10px;
+      transform: rotate(-8deg);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .img1 {
+      top: 200px;
+      left: 20px;
+      transform: rotate(-5deg);
+    }
+
+    .img2 {
+      top: 600px;
+      right: 20px;
+      transform: rotate(12deg);
+    }
+
+    .img3 {
+      top: 800px;
+      left: 20px;
+      transform: rotate(12deg);
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 30px;
+      z-index: 1;
+      position: relative;
+    }
+
+    a {
+      color: #ffc107;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Overlay Images -->
+  <img src="./konc1.jpg" class="overlay-img img1">
+  <img src="./konc2.jpg" class="overlay-img img2">
+  <img src="./konc4.jpg" class="overlay-img img3">
+
+  <div class="container my-5">
+    <h1 class="text-center mb-4">ИСКАМЕ КОНЦЕРТ НА СЛАВИ ТРИФОНОВ И КУ-КУ БЕНД</h1>
+    <p>Слави Трифонов и Ку-Ку Бенд правят НАЙ- ГОТИНАТА МУЗИКА И НАЙ- ГОТИНИТЕ КОНЦЕРТИ! Нека ИЗНЕНАДАМЕ Слави и му
+      покажем, че отново ИСКАМЕ КОНЦЕРТ!</p>
+    <p>Изминават 10 години от последния му концерт на Нацоналния стадион "Васил Левски" и ни липсва...
+      Подкрепи каузата, като изпратиш съобщение - текст и КРАТКО видео, в което ти лично показваш на Слави и Ку-Ку Бенд
+      колко много харесваш музиката им и искаш концерт!
+      Кажи своето послание!
+      Всички клипове ще бъдат сглобени и монтирани в един клип, който има за цел да се покаже на Слави и да го ПОМОЛИМ В
+      ЕДИН ГЛАС:
+      "Слави, молим те, направи поредния невероятен концерт на стадион "Васил Левски", ние нямаме търпение и ще го
+      напълним!"
+    </p>
+    <p>
+      Ако и ти си част от каузата, изпрати своето текстово видео послание към Слави.</p>
+    </p>
+
+    <form action="/submit" method="POST" enctype="multipart/form-data" class="mt-4">
+      <div class="mb-3">
+        <label class="form-label">Име</label>
+        <input type="text" name="fname" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Фамилия</label>
+        <input type="text" name="lname" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Имейл</label>
+        <input type="email" name="email" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Години</label>
+        <input type="number" name="age" class="form-control" required min="5" max="120">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Град/Село</label>
+        <input type="text" name="location" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Послание към Слави (текст)</label>
+        <textarea name="message" class="form-control" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Прикачи видео призив към Слави (.mp4/.mov/.avi)</label>
+        <input type="file" name="video" accept=".mp4,.mov,.avi" class="form-control" required>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" name="agree" class="form-check-input" required>
+        <label class="form-check-label">
+          Съгласен съм с <a href="#"
+            onclick="alert('Съгласно GDPR и ЗЗЛД, се съгласявам да дам личните си данни, както и видео с лицето и гласа си, доброволно в рамките на кампанията. Използват се само за целите на инициативата, като ще бъдат показани пред други неопределен брой хора и аз нямам никакви настоящи и бъдещи възражения към това и създателя на сайта.')">условията</a>.
+        </label>
+      </div>
+      <button type="submit" class="btn btn-warning">Изпрати и изненадай Слави!</button>
+    </form>
+  </div>
+</body>
+
+</html>
