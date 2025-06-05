@@ -102,21 +102,39 @@ const adminLimiter = rateLimit({
 app.get('/admin', adminLimiter, auth, (req, res) => {
     console.log("Client IP:", req.ip);
     const data = JSON.parse(fs.readFileSync(submissionsFile));
-    let html = '<h1>Подадени заявки</h1><ul>';
+    let submissionsTotal = 0;
+    let submissionVideos = 0;
+
+    let html = '<h1>Подадени заявки</h1>';
+
+    let listHTML = '<ul>';
+
     data.forEach(entry => {
-        html += `<li>
+        listHTML += `<li>
             <strong>${entry.fname} ${entry.lname}</strong> (${entry.email}, ${entry.age}, ${entry.location})<br>
             <em>${entry.message}</em><br>`;
         if (entry.video) {
-            html += `Видео: <a href="/admin/video/${entry.video}" target="_blank">Гледай</a><br>`;
+            listHTML += `Видео: <a href="/admin/video/${entry.video}" target="_blank">Гледай</a><br>`;
+            submissionVideos += 1;
         } else {
-            html += `Без видео.<br>`;
+            listHTML += `Без видео.<br>`;
         }
-        html += `<br></li>`;
+        submissionsTotal += 1;
+        listHTML += `<br></li>`;
     });
-    html += '</ul>';
+
+    listHTML += '</ul>';
+
+    // Add the summary at the top
+    html += `<p><strong>Общ брой заявки:</strong> ${submissionsTotal}<br>`;
+    html += `<strong>С видеа:</strong> ${submissionVideos}</p>`;
+
+    // Append the list
+    html += listHTML;
+
     res.send(html);
 });
+
 
 app.get('/admin/video/:filename', adminLimiter, auth, (req, res) => {
     const videoPath = path.join(uploadsDir, req.params.filename);
