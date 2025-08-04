@@ -145,6 +145,11 @@ app.get('/admin/video/:filename', adminLimiter, auth, (req, res) => {
     }
 });
 
+app.get('/video', (req, res) => {
+    const videoPath = path.join(__dirname, 'private', 'final.mp4');
+    res.sendFile(videoPath);
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
