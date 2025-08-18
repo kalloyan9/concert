@@ -139,7 +139,7 @@ app.get('/admin', adminLimiter, auth, (req, res) => {
 app.get('/admin/video/:filename', adminLimiter, auth, (req, res) => {
     const videoPath = path.join(uploadsDir, req.params.filename);
     if (fs.existsSync(videoPath)) {
-        res.sendFile(videoPath);
+        res.download(videoPath, req.params.filename);
     } else {
         res.status(404).send("Видео не е намерено.");
     }
@@ -153,4 +153,5 @@ app.get('/video', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
